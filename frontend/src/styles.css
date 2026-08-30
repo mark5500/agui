@@ -133,10 +133,16 @@
   box-sizing: border-box;
 }
 
+/* The app shell is exactly one viewport tall and never scrolls itself — every
+   scrollable region (the task list, the chat message list) clips and scrolls
+   internally instead. Without this, overflowing content grows `body` past the
+   viewport and the whole page scrolls, carrying the topbar and chat panel
+   along with it instead of leaving them pinned. */
 html,
 body,
 #app {
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {

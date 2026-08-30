@@ -16,9 +16,9 @@ function RootComponent() {
   return (
     <TooltipProvider delayDuration={200}>
       <ChatProvider>
-        <SidebarProvider>
+        <SidebarProvider className="h-full">
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="min-h-0">
             <AppShell />
           </SidebarInset>
         </SidebarProvider>
@@ -47,7 +47,7 @@ function AppShell() {
           to the bottom of the viewport) instead of the whole viewport — otherwise a
           fixed sidebar always spans from y=0, overlapping the header above it. */}
       <div className="flex min-h-0 flex-1" style={{ contain: 'layout' }}>
-        <div className="relative flex w-full flex-1 flex-col overflow-y-auto">
+        <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
           <Outlet />
         </div>
         {/* `h-svh` (the component's default) sizes against the real browser viewport,

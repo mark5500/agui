@@ -14,11 +14,13 @@ interface Todo {
 }
 
 /**
- * Owns its own to-do state and registers three tools for it — `add_todo`,
- * `complete_todo`, `remove_todo` — none of which exist anywhere else in the app.
- * `complete_todo`/`remove_todo` match by text rather than id, since the model has
- * no reliable way to know an item's id unless it was the one that added it (a
- * human could have added the item by hand instead).
+ * Owns its own to-do state and registers four tools for it — `list_todos`,
+ * `add_todo`, `complete_todo`, `remove_todo` — none of which exist anywhere else
+ * in the app. `complete_todo`/`remove_todo` match by text rather than id, since
+ * the model has no reliable way to know an item's id unless it was the one that
+ * added it (a human could have added the item by hand instead); `list_todos`
+ * lets it check current state — including items added by hand — before acting,
+ * instead of only ever mutating blind.
  */
 export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
@@ -34,6 +36,16 @@ export function TodoList() {
     const lower = needle.toLowerCase()
     return todos.find((t) => t.text.toLowerCase().includes(lower))
   }
+
+  useAgentTool({
+    name: 'list_todos',
+    description: 'Get the current to-do list, including which items are already complete.',
+    inputSchema: z.object({}),
+    outputSchema: z.object({
+      todos: z.array(z.object({ text: z.string(), done: z.boolean() })),
+    }),
+    execute: () => ({ todos: todos.map(({ text, done }) => ({ text, done })) }),
+  })
 
   useAgentTool({
     name: 'add_todo',

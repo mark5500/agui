@@ -5,7 +5,6 @@ import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/si
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -49,13 +48,6 @@ export function Chat() {
                           >
                             {part.content}
                           </span>
-                        )
-                      }
-                      if (part.type === 'tool-call') {
-                        return (
-                          <Badge key={i} variant="outline" className="font-mono text-xs font-normal">
-                            🎨 {part.name}({part.arguments})
-                          </Badge>
                         )
                       }
                       return null
