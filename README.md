@@ -6,7 +6,7 @@ Built from the .NET SDK shipped in [ag-ui-protocol/ag-ui#1963](https://github.co
 
 ## Layout
 
-- `backend/AguiBackend` — ASP.NET Core minimal API. Adapts an `IChatClient`
+- `backend` — ASP.NET Core minimal API. Adapts an `IChatClient`
   (Microsoft.Extensions.AI) into an AG-UI SSE endpoint at `POST /api/agent`.
 - `frontend` — Vite + TanStack Router + React chat UI using `useChat` from `@tanstack/ai-react`.
   `@tanstack/ai-client`'s wire format is AG-UI's `RunAgentInput`/`BaseEvent` protocol directly
@@ -39,7 +39,7 @@ Requires the .NET 10 SDK and Node.js.
 
 ```bash
 # backend (http://localhost:5001)
-cd backend/AguiBackend
+cd backend
 dotnet run
 ```
 
@@ -47,7 +47,7 @@ Without an `OPENAI_API_KEY`, the backend falls back to a deterministic `FakeChat
 echoes your message, so you can verify the wiring end-to-end without credentials. To use OpenAI:
 
 ```bash
-cd backend/AguiBackend
+cd backend
 dotnet user-secrets set OPENAI_API_KEY sk-...
 # optional: dotnet user-secrets set OPENAI_MODEL gpt-4o
 dotnet run
@@ -113,7 +113,7 @@ tool means adding one entry to that map; `onFinish` itself doesn't change.
 Once `addToolResult`'s auto-continuation is actually firing (confirmed working as of 0.29.x —
 it wasn't when this workaround was first written), it resends the full message history including
 the *original* user turn, since a continuation has no new user message of its own.
-[FakeChatClient.cs](backend/AguiBackend/FakeChatClient.cs) originally scripted a tool call whenever
+[FakeChatClient.cs](backend/FakeChatClient.cs) originally scripted a tool call whenever
 *any* message in history contained a known color name — so every continuation re-triggered the
 same tool call, forever, in a tight client/server loop. Fixed by only scripting the tool call when
 no tool-result message exists yet *after* the latest user turn, so each user turn gets scripted at
