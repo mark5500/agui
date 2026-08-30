@@ -24,7 +24,7 @@ interface Expense {
   category: Category
 }
 
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
 
 /**
  * Owns its own expense state and registers four tools for it — `list_expenses`,
@@ -90,7 +90,7 @@ export function ExpenseTracker() {
         .array(
           z.object({
             description: z.string().describe('What the expense was for.'),
-            amount: z.number().positive().describe('Amount in dollars, e.g. 12.50.'),
+            amount: z.number().positive().describe('Amount in pounds, e.g. 12.50.'),
             category: z.enum(CATEGORIES).describe('One of: ' + CATEGORIES.join(', ')),
           }),
         )
@@ -144,7 +144,7 @@ export function ExpenseTracker() {
         <Input
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="Amount"
+          placeholder="Amount (£)"
           inputMode="decimal"
           className="h-10 w-28"
         />
