@@ -32,9 +32,23 @@ export function TodoList() {
     return todo
   }
 
-  function findByText(needle: string) {
-    const lower = needle.toLowerCase()
-    return todos.find((t) => t.text.toLowerCase().includes(lower))
+  /**
+   * Runs `apply` against a plain local snapshot of `todos` for each text in turn —
+   * rather than dispatching one `setTodos` update per item — so a batch where two
+   * texts match against the same evolving state (e.g. one item completed twice)
+   * behaves predictably, and the whole batch lands in a single re-render.
+   */
+  function batchByText(texts: Array<string>, apply: (todos: Array<Todo>, match: Todo) => Array<Todo>) {
+    let working = todos
+    const results = texts.map((text) => {
+      const lower = text.toLowerCase()
+      const match = working.find((t) => t.text.toLowerCase().includes(lower))
+      if (!match) return { text, success: false, error: `No to-do item matching "${text}" was found.` }
+      working = apply(working, match)
+      return { text, success: true }
+    })
+    if (working !== todos) setTodos(working)
+    return results
   }
 
   useAgentTool({
@@ -49,40 +63,44 @@ export function TodoList() {
 
   useAgentTool({
     name: 'add_todo',
-    description: 'Add a new to-do item to the list.',
-    inputSchema: z.object({ text: z.string().describe('The to-do item text.') }),
-    outputSchema: z.object({ id: z.string(), text: z.string() }),
-    execute: ({ text }) => addTodo(text),
+    description: 'Add one or more new to-do items to the list.',
+    inputSchema: z.object({ texts: z.array(z.string()).min(1).describe('The to-do item texts to add.') }),
+    outputSchema: z.object({ added: z.array(z.object({ id: z.string(), text: z.string() })) }),
+    execute: ({ texts }) => ({ added: texts.map((text) => addTodo(text)) }),
   })
+
+  const batchResultSchema = z.array(
+    z.object({ text: z.string(), success: z.boolean(), error: z.string().optional() }),
+  )
 
   useAgentTool({
     name: 'complete_todo',
-    description: 'Mark a to-do item as complete. Matches by (partial) text, not id.',
+    description:
+      'Mark one or more to-do items as complete. Each is matched by (partial) text, not id — an ' +
+      'item not found is reported in the result rather than failing the whole call.',
     inputSchema: z.object({
-      text: z.string().describe('Text, or partial text, of the to-do item to complete.'),
+      texts: z.array(z.string()).min(1).describe('Text, or partial text, of each to-do item to complete.'),
     }),
-    outputSchema: z.object({ success: z.boolean() }),
-    execute: ({ text }) => {
-      const match = findByText(text)
-      if (!match) throw new Error(`No to-do item matching "${text}" was found.`)
-      setTodos((prev) => prev.map((t) => (t.id === match.id ? { ...t, done: true } : t)))
-      return { success: true }
-    },
+    outputSchema: z.object({ results: batchResultSchema }),
+    execute: ({ texts }) => ({
+      results: batchByText(texts, (list, match) =>
+        list.map((t) => (t.id === match.id ? { ...t, done: true } : t)),
+      ),
+    }),
   })
 
   useAgentTool({
     name: 'remove_todo',
-    description: 'Remove a to-do item from the list. Matches by (partial) text, not id.',
+    description:
+      'Remove one or more to-do items from the list. Each is matched by (partial) text, not id — an ' +
+      'item not found is reported in the result rather than failing the whole call.',
     inputSchema: z.object({
-      text: z.string().describe('Text, or partial text, of the to-do item to remove.'),
+      texts: z.array(z.string()).min(1).describe('Text, or partial text, of each to-do item to remove.'),
     }),
-    outputSchema: z.object({ success: z.boolean() }),
-    execute: ({ text }) => {
-      const match = findByText(text)
-      if (!match) throw new Error(`No to-do item matching "${text}" was found.`)
-      setTodos((prev) => prev.filter((t) => t.id !== match.id))
-      return { success: true }
-    },
+    outputSchema: z.object({ results: batchResultSchema }),
+    execute: ({ texts }) => ({
+      results: batchByText(texts, (list, match) => list.filter((t) => t.id !== match.id)),
+    }),
   })
 
   const remaining = todos.filter((t) => !t.done).length
