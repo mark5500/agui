@@ -1,5 +1,5 @@
 import { PanelLeftIcon, User } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -20,7 +20,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ChatSidebarTrigger } from '@/components/chat-sidebar-trigger'
 
+const PAGE_LABELS: Record<string, string> = {
+  '/': 'Tasks',
+  '/expenses': 'Expenses',
+}
+
 export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
+  const location = useLocation()
+  const pageLabel = PAGE_LABELS[location.pathname] ?? 'Tasks'
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
       <Button variant="ghost" size="icon-sm" onClick={onToggleNav} aria-label="Toggle navigation">
@@ -35,7 +43,7 @@ export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
           </BreadcrumbItem>
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
-            <BreadcrumbPage>Tasks</BreadcrumbPage>
+            <BreadcrumbPage>{pageLabel}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

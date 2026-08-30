@@ -1,5 +1,5 @@
-import { Bot, ListTodo } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Bot, ListTodo, Receipt } from 'lucide-react'
+import { Link, useLocation } from '@tanstack/react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +12,14 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
+const NAV_ITEMS = [
+  { to: '/', label: 'Tasks', icon: ListTodo },
+  { to: '/expenses', label: 'Expenses', icon: Receipt },
+] as const
+
 export function AppSidebar() {
+  const location = useLocation()
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -35,14 +42,16 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive tooltip="Tasks">
-                  <Link to="/">
-                    <ListTodo />
-                    <span>Tasks</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+                <SidebarMenuItem key={to}>
+                  <SidebarMenuButton asChild isActive={location.pathname === to} tooltip={label}>
+                    <Link to={to}>
+                      <Icon />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
