@@ -108,7 +108,10 @@ export function FeedbackForm() {
   return (
     <div className="flex flex-1 flex-col gap-8 px-6 pb-6 lg:flex-row">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-md flex-col gap-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex w-full max-w-md flex-col gap-4"
+        >
           <FormField
             control={form.control}
             name="title"
@@ -137,14 +140,14 @@ export function FeedbackForm() {
                         type="button"
                         onClick={() => field.onChange(value)}
                         aria-label={`${value} star${value === 1 ? '' : 's'}`}
-                        className="rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        className="focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-3"
                       >
                         <Star
                           className={
                             'size-6 ' +
                             (value <= field.value
                               ? 'fill-primary text-primary'
-                              : 'fill-none text-muted-foreground')
+                              : 'text-muted-foreground fill-none')
                           }
                         />
                       </button>
@@ -177,7 +180,7 @@ export function FeedbackForm() {
       </Form>
 
       <div className="flex-1">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+        <h2 className="text-muted-foreground mb-3 text-sm font-medium">
           {submissions.length === 0 ? 'No submissions yet' : `${submissions.length} submission(s)`}
         </h2>
         {submissions.length > 0 && (
@@ -192,13 +195,16 @@ export function FeedbackForm() {
                         <Star
                           key={v}
                           className={
-                            'size-3.5 ' + (v <= s.rating ? 'fill-primary text-primary' : 'fill-none text-muted-foreground')
+                            'size-3.5 ' +
+                            (v <= s.rating
+                              ? 'fill-primary text-primary'
+                              : 'text-muted-foreground fill-none')
                           }
                         />
                       ))}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{s.comments}</p>
+                  <p className="text-muted-foreground text-sm">{s.comments}</p>
                 </div>
                 {index < submissions.length - 1 && <Separator />}
               </li>

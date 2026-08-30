@@ -15,7 +15,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-const CATEGORIES = ['Food', 'Transport', 'Housing', 'Entertainment', 'Shopping', 'Health', 'Other'] as const
+const CATEGORIES = [
+  'Food',
+  'Transport',
+  'Housing',
+  'Entertainment',
+  'Shopping',
+  'Health',
+  'Other',
+] as const
 type Category = (typeof CATEGORIES)[number]
 
 interface Expense {
@@ -66,7 +74,12 @@ export function ExpenseTracker() {
     inputSchema: z.object({}),
     outputSchema: z.object({
       expenses: z.array(
-        z.object({ id: z.string(), description: z.string(), amount: z.number(), category: z.string() }),
+        z.object({
+          id: z.string(),
+          description: z.string(),
+          amount: z.number(),
+          category: z.string(),
+        }),
       ),
     }),
     execute: () => ({ expenses }),
@@ -106,16 +119,22 @@ export function ExpenseTracker() {
   useAgentTool({
     name: 'remove_expense',
     description: 'Remove one or more logged expenses, by id. Use list_expenses to find ids.',
-    inputSchema: z.object({ ids: z.array(z.string()).min(1).describe('Ids of the expenses to remove.') }),
+    inputSchema: z.object({
+      ids: z.array(z.string()).min(1).describe('Ids of the expenses to remove.'),
+    }),
     outputSchema: z.object({
-      results: z.array(z.object({ id: z.string(), success: z.boolean(), error: z.string().optional() })),
+      results: z.array(
+        z.object({ id: z.string(), success: z.boolean(), error: z.string().optional() }),
+      ),
     }),
     execute: ({ ids }) => {
       const known = new Set(expenses.map((e) => e.id))
       setExpenses((prev) => prev.filter((e) => !ids.includes(e.id)))
       return {
         results: ids.map((id) =>
-          known.has(id) ? { id, success: true } : { id, success: false, error: `No expense with id "${id}" was found.` },
+          known.has(id)
+            ? { id, success: true }
+            : { id, success: false, error: `No expense with id "${id}" was found.` },
         ),
       }
     },
@@ -179,7 +198,9 @@ export function ExpenseTracker() {
       )}
 
       {expenses.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing logged yet — add one above, or ask the agent.</p>
+        <p className="text-muted-foreground text-sm">
+          Nothing logged yet — add one above, or ask the agent.
+        </p>
       ) : (
         <ul>
           {expenses.map((expense, index) => (
@@ -187,7 +208,7 @@ export function ExpenseTracker() {
               <div className="flex items-center gap-3 py-3">
                 <span className="flex-1 text-base">{expense.description}</span>
                 <Badge variant="outline">{expense.category}</Badge>
-                <span className="w-20 text-right text-sm tabular-nums text-muted-foreground">
+                <span className="text-muted-foreground w-20 text-right text-sm tabular-nums">
                   {currency.format(expense.amount)}
                 </span>
                 <Button

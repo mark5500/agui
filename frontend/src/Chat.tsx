@@ -31,7 +31,7 @@ export function Chat() {
     <>
       <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" />
+          <Sparkles className="text-primary size-4" />
           <span className="font-semibold">Chat</span>
         </div>
       </SidebarHeader>
@@ -42,7 +42,10 @@ export function Chat() {
             {messages
               .filter((m) => m.role === 'user' || m.role === 'assistant')
               .map((m) => (
-                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div
+                  key={m.id}
+                  className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}
+                >
                   <div className="flex max-w-[85%] flex-col items-start gap-1">
                     {m.parts.map((part, i) => {
                       if (part.type === 'text' && part.content) {
@@ -68,7 +71,7 @@ export function Chat() {
                 </div>
               ))}
             {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Ask the agent to add to-dos or change the background color.
               </p>
             )}

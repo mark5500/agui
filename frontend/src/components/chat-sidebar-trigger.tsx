@@ -12,7 +12,12 @@ export function ChatSidebarTrigger() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon-sm" onClick={toggleSidebar} aria-label={open ? 'Hide chat' : 'Show chat'}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={toggleSidebar}
+          aria-label={open ? 'Hide chat' : 'Show chat'}
+        >
           <MessageSquare />
         </Button>
       </TooltipTrigger>

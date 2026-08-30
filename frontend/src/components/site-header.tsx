@@ -55,7 +55,7 @@ export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="ml-1 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <button className="focus-visible:ring-ring/50 ml-1 rounded-full outline-none focus-visible:ring-3">
               <Avatar className="size-8">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {CURRENT_USER.initials}
@@ -67,7 +67,7 @@ export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span className="truncate font-medium">{CURRENT_USER.name}</span>
-                <span className="truncate text-xs font-normal text-muted-foreground">
+                <span className="text-muted-foreground truncate text-xs font-normal">
                   {CURRENT_USER.email}
                 </span>
               </div>

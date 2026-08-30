@@ -50,7 +50,9 @@ export function TodoList() {
   useAgentTool({
     name: 'add_todo',
     description: 'Add one or more new to-do items to the list.',
-    inputSchema: z.object({ texts: z.array(z.string()).min(1).describe('The to-do item texts to add.') }),
+    inputSchema: z.object({
+      texts: z.array(z.string()).min(1).describe('The to-do item texts to add.'),
+    }),
     outputSchema: z.object({ added: z.array(z.object({ id: z.string(), text: z.string() })) }),
     execute: ({ texts }) => ({ added: texts.map((text) => addTodo(text)) }),
   })
@@ -58,14 +60,18 @@ export function TodoList() {
   useAgentTool({
     name: 'complete_todo',
     description: 'Mark one or more to-do items as complete, by id. Use list_todos to find ids.',
-    inputSchema: z.object({ ids: z.array(z.string()).min(1).describe('Ids of the to-do items to complete.') }),
+    inputSchema: z.object({
+      ids: z.array(z.string()).min(1).describe('Ids of the to-do items to complete.'),
+    }),
     outputSchema: z.object({ results: idResultSchema }),
     execute: ({ ids }) => {
       const known = new Set(todos.map((t) => t.id))
       setTodos((prev) => prev.map((t) => (ids.includes(t.id) ? { ...t, done: true } : t)))
       return {
         results: ids.map((id) =>
-          known.has(id) ? { id, success: true } : { id, success: false, error: `No to-do item with id "${id}" was found.` },
+          known.has(id)
+            ? { id, success: true }
+            : { id, success: false, error: `No to-do item with id "${id}" was found.` },
         ),
       }
     },
@@ -74,14 +80,18 @@ export function TodoList() {
   useAgentTool({
     name: 'remove_todo',
     description: 'Remove one or more to-do items from the list, by id. Use list_todos to find ids.',
-    inputSchema: z.object({ ids: z.array(z.string()).min(1).describe('Ids of the to-do items to remove.') }),
+    inputSchema: z.object({
+      ids: z.array(z.string()).min(1).describe('Ids of the to-do items to remove.'),
+    }),
     outputSchema: z.object({ results: idResultSchema }),
     execute: ({ ids }) => {
       const known = new Set(todos.map((t) => t.id))
       setTodos((prev) => prev.filter((t) => !ids.includes(t.id)))
       return {
         results: ids.map((id) =>
-          known.has(id) ? { id, success: true } : { id, success: false, error: `No to-do item with id "${id}" was found.` },
+          known.has(id)
+            ? { id, success: true }
+            : { id, success: false, error: `No to-do item with id "${id}" was found.` },
         ),
       }
     },
@@ -114,13 +124,15 @@ export function TodoList() {
       </form>
 
       {todos.length > 0 && (
-        <p className="mb-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-2 text-sm">
           {remaining} of {todos.length} remaining
         </p>
       )}
 
       {todos.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing yet — add a task above, or ask the agent.</p>
+        <p className="text-muted-foreground text-sm">
+          Nothing yet — add a task above, or ask the agent.
+        </p>
       ) : (
         <ul>
           {todos.map((todo, index) => (
@@ -129,10 +141,16 @@ export function TodoList() {
                 <Checkbox
                   checked={todo.done}
                   onCheckedChange={() =>
-                    setTodos((prev) => prev.map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)))
+                    setTodos((prev) =>
+                      prev.map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
+                    )
                   }
                 />
-                <span className={todo.done ? 'flex-1 text-base line-through opacity-60' : 'flex-1 text-base'}>
+                <span
+                  className={
+                    todo.done ? 'flex-1 text-base line-through opacity-60' : 'flex-1 text-base'
+                  }
+                >
                   {todo.text}
                 </span>
                 <Button
