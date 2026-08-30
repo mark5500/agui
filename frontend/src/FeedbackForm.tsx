@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-const CATEGORIES = ['Bug', 'Feature Request', 'General', 'Praise'] as const
+const CATEGORIES = ['Compliment', 'Suggestion', 'Complaint', 'Question'] as const
 
 // What the visible form (and the tool) actually collects — identity comes from
 // CURRENT_USER instead of being typed/supplied, same as a real "logged in" app.
@@ -45,7 +45,7 @@ interface Submission extends FeedbackValues {
 }
 
 const DEFAULT_VALUES: FeedbackValues = {
-  category: 'General',
+  category: 'Suggestion',
   rating: 0,
   comments: '',
 }
