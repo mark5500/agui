@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { z } from 'zod'
 import { useAgentTool } from './chat/useAgentTool'
+import { useLocalStorageState } from './useLocalStorageState'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -35,7 +36,7 @@ const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: '
  * over a `list_expenses` dump.
  */
 export function ExpenseTracker() {
-  const [expenses, setExpenses] = useState<Array<Expense>>([])
+  const [expenses, setExpenses] = useLocalStorageState<Array<Expense>>('agui:expenses', [])
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState<Category>('Other')

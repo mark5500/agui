@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Star } from 'lucide-react'
 import { useAgentTool } from './chat/useAgentTool'
+import { useLocalStorageState } from './useLocalStorageState'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -59,7 +59,7 @@ const DEFAULT_VALUES: FeedbackValues = {
  * through the same validation path.
  */
 export function FeedbackForm() {
-  const [submissions, setSubmissions] = useState<Array<Submission>>([])
+  const [submissions, setSubmissions] = useLocalStorageState<Array<Submission>>('agui:feedback', [])
 
   const form = useForm<FeedbackValues>({
     resolver: zodResolver(feedbackSchema),

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { z } from 'zod'
 import { useAgentTool } from './chat/useAgentTool'
+import { useLocalStorageState } from './useLocalStorageState'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,7 @@ interface Todo {
  * or removed outside the tools) is always what the model is actually operating on.
  */
 export function TodoList() {
-  const [todos, setTodos] = useState<Todo[]>([])
+  const [todos, setTodos] = useLocalStorageState<Todo[]>('agui:todos', [])
   const [draft, setDraft] = useState('')
 
   function addTodo(text: string) {
