@@ -4,8 +4,8 @@ import { z } from 'zod'
 import { Star } from 'lucide-react'
 import { useAgentTool } from './chat/useAgentTool'
 import { useLocalStorageState } from './useLocalStorageState'
+import { CURRENT_USER } from './currentUser'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -27,9 +27,9 @@ import {
 
 const CATEGORIES = ['Bug', 'Feature Request', 'General', 'Praise'] as const
 
+// What the visible form (and the tool) actually collects — identity comes from
+// CURRENT_USER instead of being typed/supplied, same as a real "logged in" app.
 const feedbackSchema = z.object({
-  name: z.string().min(1, 'Name is required.'),
-  email: z.string().email('Enter a valid email address.'),
   category: z.enum(CATEGORIES),
   rating: z.number().int().min(1, 'Please choose a rating.').max(5),
   comments: z.string().min(10, 'Please add a bit more detail (at least 10 characters).'),
@@ -39,12 +39,12 @@ type FeedbackValues = z.infer<typeof feedbackSchema>
 
 interface Submission extends FeedbackValues {
   id: string
+  name: string
+  email: string
   submittedAt: string
 }
 
 const DEFAULT_VALUES: FeedbackValues = {
-  name: '',
-  email: '',
   category: 'General',
   rating: 0,
   comments: '',
@@ -67,7 +67,13 @@ export function FeedbackForm() {
   })
 
   function logSubmission(data: FeedbackValues) {
-    const entry: Submission = { id: crypto.randomUUID(), ...data, submittedAt: new Date().toISOString() }
+    const entry: Submission = {
+      id: crypto.randomUUID(),
+      name: CURRENT_USER.name,
+      email: CURRENT_USER.email,
+      ...data,
+      submittedAt: new Date().toISOString(),
+    }
     setSubmissions((prev) => [entry, ...prev])
     return entry
   }
@@ -85,8 +91,6 @@ export function FeedbackForm() {
       submissions: z.array(
         z.object({
           id: z.string(),
-          name: z.string(),
-          email: z.string(),
           category: z.string(),
           rating: z.number(),
           comments: z.string(),
@@ -99,7 +103,7 @@ export function FeedbackForm() {
   useAgentTool({
     name: 'submit_feedback',
     description:
-      'Fill in and submit the feedback form on the user’s behalf. Rating is 1 (worst) to 5 (best).',
+      'Fill in and submit the feedback form on the current user’s behalf. Rating is 1 (worst) to 5 (best).',
     inputSchema: feedbackSchema,
     outputSchema: z.object({ id: z.string() }),
     execute: (input) => {
@@ -114,34 +118,6 @@ export function FeedbackForm() {
     <div className="flex flex-1 flex-col gap-8 px-6 pb-6 lg:flex-row">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-md flex-col gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ada Lovelace" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="ada@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="category"
@@ -230,7 +206,6 @@ export function FeedbackForm() {
               <li key={s.id}>
                 <div className="flex flex-col gap-1 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{s.name}</span>
                     <Badge variant="outline">{s.category}</Badge>
                     <span className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((v) => (

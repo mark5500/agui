@@ -1,5 +1,6 @@
-import { PanelLeftIcon, User } from 'lucide-react'
+import { PanelLeftIcon } from 'lucide-react'
 import { Link, useLocation } from '@tanstack/react-router'
+import { CURRENT_USER } from '@/currentUser'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -56,14 +57,21 @@ export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
           <DropdownMenuTrigger asChild>
             <button className="ml-1 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
               <Avatar className="size-8">
-                <AvatarFallback>
-                  <User className="size-4" />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {CURRENT_USER.initials}
                 </AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Demo User</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col">
+                <span className="truncate font-medium">{CURRENT_USER.name}</span>
+                <span className="truncate text-xs font-normal text-muted-foreground">
+                  {CURRENT_USER.email}
+                </span>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem disabled>Settings</DropdownMenuItem>
             <DropdownMenuItem disabled>Sign out</DropdownMenuItem>
