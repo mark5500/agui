@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Sparkles } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -11,6 +11,14 @@ import { Button } from '@/components/ui/button'
 export function Chat() {
   const [input, setInput] = useState('')
   const { messages, sendMessage, isLoading } = useChatContext()
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Depends on `messages` itself, not just its length, so this also fires on
+  // every streamed token (each delta produces a new `messages` array), not just
+  // when a whole new message is appended.
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: 'end' })
+  }, [messages])
 
   async function send() {
     const text = input.trim()
@@ -64,6 +72,7 @@ export function Chat() {
                 Ask the agent to add to-dos or change the background color.
               </p>
             )}
+            <div ref={bottomRef} />
           </div>
         </ScrollArea>
       </SidebarContent>
