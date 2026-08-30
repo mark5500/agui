@@ -6,16 +6,9 @@ import { useAgentTool } from './chat/useAgentTool'
 import { useLocalStorageState } from './useLocalStorageState'
 import { CURRENT_USER } from './currentUser'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Form,
   FormControl,
@@ -25,12 +18,10 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-const CATEGORIES = ['Compliment', 'Suggestion', 'Complaint', 'Question'] as const
-
 // What the visible form (and the tool) actually collects — identity comes from
 // CURRENT_USER instead of being typed/supplied, same as a real "logged in" app.
 const feedbackSchema = z.object({
-  category: z.enum(CATEGORIES),
+  title: z.string().min(1, 'Title is required.'),
   rating: z.number().int().min(1, 'Please choose a rating.').max(5),
   comments: z.string().min(10, 'Please add a bit more detail (at least 10 characters).'),
 })
@@ -45,7 +36,7 @@ interface Submission extends FeedbackValues {
 }
 
 const DEFAULT_VALUES: FeedbackValues = {
-  category: 'Suggestion',
+  title: '',
   rating: 0,
   comments: '',
 }
@@ -91,7 +82,7 @@ export function FeedbackForm() {
       submissions: z.array(
         z.object({
           id: z.string(),
-          category: z.string(),
+          title: z.string(),
           rating: z.number(),
           comments: z.string(),
         }),
@@ -120,24 +111,13 @@ export function FeedbackForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-md flex-col gap-4">
           <FormField
             control={form.control}
-            name="category"
+            name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="!h-10 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Sum it up in a few words" className="h-10" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -206,7 +186,7 @@ export function FeedbackForm() {
               <li key={s.id}>
                 <div className="flex flex-col gap-1 py-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline">{s.category}</Badge>
+                    <span className="font-medium">{s.title}</span>
                     <span className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((v) => (
                         <Star
