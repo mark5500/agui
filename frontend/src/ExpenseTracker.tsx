@@ -149,7 +149,7 @@ export function ExpenseTracker() {
           className="h-10 w-28"
         />
         <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
-          <SelectTrigger className="h-10 w-40">
+          <SelectTrigger className="!h-10 w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
