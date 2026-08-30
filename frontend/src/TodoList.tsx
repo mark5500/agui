@@ -16,11 +16,11 @@ interface Todo {
 /**
  * Owns its own to-do state and registers four tools for it — `list_todos`,
  * `add_todo`, `complete_todo`, `remove_todo` — none of which exist anywhere else
- * in the app. `complete_todo`/`remove_todo` match by text rather than id, since
- * the model has no reliable way to know an item's id unless it was the one that
- * added it (a human could have added the item by hand instead); `list_todos`
- * lets it check current state — including items added by hand — before acting,
- * instead of only ever mutating blind.
+ * in the app. `complete_todo`/`remove_todo` take ids, not text — `list_todos`
+ * (or `add_todo`'s own return value) is how the model learns them, the same way
+ * a human uses the checkbox/✕ next to a specific rendered row rather than typing
+ * the task out again. It also means state changed by hand (an item added, checked,
+ * or removed outside the tools) is always what the model is actually operating on.
  */
 export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
@@ -32,33 +32,18 @@ export function TodoList() {
     return todo
   }
 
-  /**
-   * Runs `apply` against a plain local snapshot of `todos` for each text in turn —
-   * rather than dispatching one `setTodos` update per item — so a batch where two
-   * texts match against the same evolving state (e.g. one item completed twice)
-   * behaves predictably, and the whole batch lands in a single re-render.
-   */
-  function batchByText(texts: Array<string>, apply: (todos: Array<Todo>, match: Todo) => Array<Todo>) {
-    let working = todos
-    const results = texts.map((text) => {
-      const lower = text.toLowerCase()
-      const match = working.find((t) => t.text.toLowerCase().includes(lower))
-      if (!match) return { text, success: false, error: `No to-do item matching "${text}" was found.` }
-      working = apply(working, match)
-      return { text, success: true }
-    })
-    if (working !== todos) setTodos(working)
-    return results
-  }
+  const idResultSchema = z.array(
+    z.object({ id: z.string(), success: z.boolean(), error: z.string().optional() }),
+  )
 
   useAgentTool({
     name: 'list_todos',
-    description: 'Get the current to-do list, including which items are already complete.',
+    description: "Get the current to-do list, including each item's id and completion status.",
     inputSchema: z.object({}),
     outputSchema: z.object({
-      todos: z.array(z.object({ text: z.string(), done: z.boolean() })),
+      todos: z.array(z.object({ id: z.string(), text: z.string(), done: z.boolean() })),
     }),
-    execute: () => ({ todos: todos.map(({ text, done }) => ({ text, done })) }),
+    execute: () => ({ todos }),
   })
 
   useAgentTool({
@@ -69,38 +54,36 @@ export function TodoList() {
     execute: ({ texts }) => ({ added: texts.map((text) => addTodo(text)) }),
   })
 
-  const batchResultSchema = z.array(
-    z.object({ text: z.string(), success: z.boolean(), error: z.string().optional() }),
-  )
-
   useAgentTool({
     name: 'complete_todo',
-    description:
-      'Mark one or more to-do items as complete. Each is matched by (partial) text, not id — an ' +
-      'item not found is reported in the result rather than failing the whole call.',
-    inputSchema: z.object({
-      texts: z.array(z.string()).min(1).describe('Text, or partial text, of each to-do item to complete.'),
-    }),
-    outputSchema: z.object({ results: batchResultSchema }),
-    execute: ({ texts }) => ({
-      results: batchByText(texts, (list, match) =>
-        list.map((t) => (t.id === match.id ? { ...t, done: true } : t)),
-      ),
-    }),
+    description: 'Mark one or more to-do items as complete, by id. Use list_todos to find ids.',
+    inputSchema: z.object({ ids: z.array(z.string()).min(1).describe('Ids of the to-do items to complete.') }),
+    outputSchema: z.object({ results: idResultSchema }),
+    execute: ({ ids }) => {
+      const known = new Set(todos.map((t) => t.id))
+      setTodos((prev) => prev.map((t) => (ids.includes(t.id) ? { ...t, done: true } : t)))
+      return {
+        results: ids.map((id) =>
+          known.has(id) ? { id, success: true } : { id, success: false, error: `No to-do item with id "${id}" was found.` },
+        ),
+      }
+    },
   })
 
   useAgentTool({
     name: 'remove_todo',
-    description:
-      'Remove one or more to-do items from the list. Each is matched by (partial) text, not id — an ' +
-      'item not found is reported in the result rather than failing the whole call.',
-    inputSchema: z.object({
-      texts: z.array(z.string()).min(1).describe('Text, or partial text, of each to-do item to remove.'),
-    }),
-    outputSchema: z.object({ results: batchResultSchema }),
-    execute: ({ texts }) => ({
-      results: batchByText(texts, (list, match) => list.filter((t) => t.id !== match.id)),
-    }),
+    description: 'Remove one or more to-do items from the list, by id. Use list_todos to find ids.',
+    inputSchema: z.object({ ids: z.array(z.string()).min(1).describe('Ids of the to-do items to remove.') }),
+    outputSchema: z.object({ results: idResultSchema }),
+    execute: ({ ids }) => {
+      const known = new Set(todos.map((t) => t.id))
+      setTodos((prev) => prev.filter((t) => !ids.includes(t.id)))
+      return {
+        results: ids.map((id) =>
+          known.has(id) ? { id, success: true } : { id, success: false, error: `No to-do item with id "${id}" was found.` },
+        ),
+      }
+    },
   })
 
   const remaining = todos.filter((t) => !t.done).length
