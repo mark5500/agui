@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useChatContext } from './chat/ChatProvider'
 import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -37,17 +39,19 @@ export function Chat() {
                     {m.parts.map((part, i) => {
                       if (part.type === 'text' && part.content) {
                         return (
-                          <span
+                          <div
                             key={i}
                             className={
-                              'inline-block rounded-lg px-3 py-2 text-sm ' +
+                              'prose prose-sm max-w-none rounded-lg px-3 py-2 ' +
+                              'prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-1.5 ' +
+                              'prose-pre:my-1.5 prose-pre:bg-black/10 prose-code:before:content-none prose-code:after:content-none ' +
                               (m.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
+                                ? 'prose-invert bg-primary text-primary-foreground'
                                 : 'bg-muted text-foreground')
                             }
                           >
-                            {part.content}
-                          </span>
+                            <Markdown remarkPlugins={[remarkGfm]}>{part.content}</Markdown>
+                          </div>
                         )
                       }
                       return null
