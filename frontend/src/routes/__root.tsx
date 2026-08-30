@@ -5,6 +5,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { SiteHeader } from '@/components/site-header'
 import { ChatProvider } from '../chat/ChatProvider'
 import { Chat } from '../Chat'
+import { useLocalStorageState } from '../useLocalStorageState'
 
 import '../styles.css'
 
@@ -35,9 +36,12 @@ function RootComponent() {
  */
 function AppShell() {
   const { toggleSidebar: toggleNav } = useSidebar()
+  const [chatOpen, setChatOpen] = useLocalStorageState('agui:chatOpen', true)
 
   return (
     <SidebarProvider
+      open={chatOpen}
+      onOpenChange={setChatOpen}
       className="min-h-0 flex-1 flex-col"
       style={{ '--sidebar-width': '26rem' } as React.CSSProperties}
     >
