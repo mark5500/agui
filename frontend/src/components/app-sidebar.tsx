@@ -1,4 +1,4 @@
-import { Bot, ListTodo, Receipt } from 'lucide-react'
+import { Bot, ListTodo, MessageSquareHeart, Receipt } from 'lucide-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
 const NAV_ITEMS = [
   { to: '/', label: 'Tasks', icon: ListTodo },
   { to: '/expenses', label: 'Expenses', icon: Receipt },
+  { to: '/feedback', label: 'Feedback', icon: MessageSquareHeart },
 ] as const
 
 export function AppSidebar() {

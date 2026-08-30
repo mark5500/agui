@@ -23,6 +23,7 @@ import { ChatSidebarTrigger } from '@/components/chat-sidebar-trigger'
 const PAGE_LABELS: Record<string, string> = {
   '/': 'Tasks',
   '/expenses': 'Expenses',
+  '/feedback': 'Feedback',
 }
 
 export function SiteHeader({ onToggleNav }: { onToggleNav: () => void }) {
